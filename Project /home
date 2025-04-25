@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hybrid Fuzzy Neural Network | Stock Prediction</title>
+    <link rel="stylesheet" href="q.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <a href="#" class="logo">FuzzyStock AI</a>  
+        <nav class="navbar">
+            <a href="#" class="active">Home</a>
+            <a href="#predict">Predict</a>
+            <a href="#methodology">Methodology</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </header>
+    
+    <section class="home">
+        <span class="home-imgleft"></span>
+        <div class="home-content">
+            <h1>Hybrid Fuzzy Neural Network</h1>
+            <h3>Predict <span id="stockTicker">NIFTY50</span> Trends</h3>
+            <p>Our AI model combines fuzzy logic and neural networks to forecast stock market movements with 89% accuracy. Input a stock symbol to get started.</p>
+            
+            <div class="ticker-container">
+                <div class="ticker">
+                    <span>📈 AAPL: $182.34 (+1.2%)</span>
+                    <span>📉 TSLA: $168.29 (-0.8%)</span>
+                    <span>📈 RELIANCE: ₹2,856 (+2.1%)</span>
+                    <span>📊 NIFTY50: 22,104.05 (+0.9%)</span>
+                    <span>📈 TATA: ₹3,421 (+1.5%)</span>
+                </div>
+            </div>
+            
+            <div id="predict" class="search-container">
+                <input type="text" placeholder="Search Indian stocks (e.g., TCS, RELIANCE)" class="search-input" id="stockInput">
+                <button class="search-btn" id="predictBtn">
+                    <i class="fas fa-chart-line"></i> Predict
+                </button>
+            </div>
+            
+            <div class="signal-container" id="resultContainer">
+                
+            </div>
+            
+            <div class="home-sci">
+                <a href="#"><i class='bx bxl-github'></i></a>
+                <a href="#"><i class='bx bxl-linkedin'></i></a>
+                <a href="#"><i class='bx bxl-youtube'></i></a>
+            </div>
+        </div>
+        <span class="home-imghover"></span>
+    </section>
+
+    
+    <section id="methodology" class="methodology-section">
+        <div class="section-content">
+            <h2>Our Hybrid Methodology</h2>
+            <div class="methodology-grid">
+                <div class="method-card">
+                    <i class="fas fa-brain"></i>
+                    <h3>Neural Network</h3>
+                    <p>Deep learning analyzes historical patterns and technical indicators.</p>
+                </div>
+                <div class="method-card">
+                    <i class="fas fa-project-diagram"></i>
+                    <h3>Fuzzy Logic</h3>
+                    <p>Rule-based system interprets market conditions using linguistic variables.</p>
+                </div>
+                <div class="method-card">
+                    <i class="fas fa-robot"></i>
+                    <h3>Hybrid Intelligence</h3>
+                    <p>Combines neural network precision with fuzzy system interpretability.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="contact-section">
+        <div class="section-content">
+            <h2>Contact Us</h2>
+            <form class="contact-form">
+                <input type="text" placeholder="Your Name" required>
+                <input type="email" placeholder="Your Email" required>
+                <textarea placeholder="Your Message" required></textarea>
+                <button type="submit">Send Message</button>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        document.getElementById('predictBtn').addEventListener('click', async function() {
+            const stock = document.getElementById('stockInput').value.trim();
+            const resultContainer = document.getElementById('resultContainer');
+            
+            if (!stock) {
+                resultContainer.innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Please enter a stock symbol
+                    </div>
+                `;
+                return;
+            }
+            
+            resultContainer.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Analyzing ${stock.toUpperCase()}...
+                </div>
+            `;
+            
+            try {
+                const response = await fetch('http://localhost:8000/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ticker: stock})
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === "success") {
+                    resultContainer.innerHTML = `
+                        <div class="signal ${data.prediction.toLowerCase()}">
+                            <i class="fas fa-arrow-${data.prediction === 'BUY' ? 'up' : 'down'}"></i>
+                            <span>${data.prediction} Signal (${data.confidence})</span>
+                            <div class="stock-details">
+                                <p><strong>${data.price}</strong></p>
+                                <p>RSI: ${data.rsi}</p>
+                                <p>Volatility: ${data.volatility}</p>
+                                <p>20D MA: ${data['20D_MA']}</p>
+                                <p>50D MA: ${data['50D_MA']}</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultContainer.innerHTML = `
+                        <div class="error">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            ${data.message || 'Analysis failed'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultContainer.innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-unlink"></i>
+                        Connection error. Is the backend running?
+                    </div>
+                `;
+                console.error('Error:', error);
+            }
+        });
+
+        
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
